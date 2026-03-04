@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { getCurrentUser } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -44,9 +44,12 @@ interface CreatedQuiz {
 
 export default function MyQuizzesPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [completedQuizzes, setCompletedQuizzes] = useState<CompletedQuiz[]>([]);
   const [createdQuizzes, setCreatedQuizzes] = useState<CreatedQuiz[]>([]);
+  const initialTab = (location.state as { tab?: string })?.tab === 'created' ? 'created' : 'completed';
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
     loadData();
@@ -150,7 +153,7 @@ export default function MyQuizzesPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="completed" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="glass border-0 shadow-lg w-full grid grid-cols-2 h-12">
           <TabsTrigger
             value="completed"
@@ -198,7 +201,7 @@ export default function MyQuizzesPage() {
                 <CompletedQuizCard
                   key={result.id}
                   result={result}
-                  onView={() => navigate(`/result/${result.id}`)}
+                  onView={() => navigate(`/my-quizzes/result/${result.id}`)}
                   formatDate={formatDate}
                 />
               ))}
@@ -253,7 +256,10 @@ function CompletedQuizCard({
   const answerCount = Object.keys(answers).length;
 
   return (
-    <Card className="glass-card border-0 shadow-xl group shine-effect overflow-hidden">
+    <Card
+      className="glass-card border-0 shadow-xl group shine-effect overflow-hidden cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.99]"
+      onClick={onView}
+    >
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -283,32 +289,10 @@ function CompletedQuizCard({
                 <span>{formatDate(result.created_at)}</span>
               </div>
             </div>
-
-            {/* 答案预览 */}
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-xs text-gray-400 mb-2 font-medium">答题记录预览</p>
-              <div className="grid grid-cols-1 gap-1 max-h-24 overflow-y-auto pr-1">
-                {Object.entries(answers).slice(0, 3).map(([qCode, answer]) => (
-                  <div key={qCode} className="text-xs text-gray-600 bg-white/60 rounded-lg px-3 py-1.5 truncate">
-                    <span className="text-gray-400 mr-1">{qCode.split('_').pop()}：</span>
-                    {answer}
-                  </div>
-                ))}
-                {answerCount > 3 && (
-                  <p className="text-xs text-gray-400 px-3">...还有 {answerCount - 3} 道题</p>
-                )}
-              </div>
-            </div>
           </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onView}
-            className="shrink-0 text-[#2D5A27] hover:bg-[#2D5A27]/10 group-hover:scale-110 transition-transform"
-          >
+          <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-[#2D5A27]/10 text-[#2D5A27] group-hover:bg-[#2D5A27]/20 transition-colors">
             <ChevronRight className="w-5 h-5" />
-          </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -326,7 +310,10 @@ function CreatedQuizCard({
   formatDate: (d: string) => string;
 }) {
   return (
-    <Card className="glass-card border-0 shadow-xl group shine-effect overflow-hidden">
+    <Card
+      className="glass-card border-0 shadow-xl group shine-effect overflow-hidden cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.99]"
+      onClick={onEdit}
+    >
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -360,11 +347,10 @@ function CreatedQuizCard({
               </div>
             </div>
           </div>
-
           <Button
-            onClick={onEdit}
             size="sm"
-            className="shrink-0 bg-[#2D5A27] hover:bg-[#234a1f] text-white shadow-md group-hover:scale-105 transition-transform"
+            className="shrink-0 bg-[#2D5A27] hover:bg-[#234a1f] text-white shadow-md group-hover:scale-105 transition-transform pointer-events-none"
+            tabIndex={-1}
           >
             <Edit3 className="w-4 h-4 mr-1" />
             编辑

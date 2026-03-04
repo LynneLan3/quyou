@@ -82,10 +82,10 @@ export default function HomePage() {
       {/* 欢迎区域 - 磨玻璃卡片 */}
       <div className="text-center py-12 glass rounded-3xl animate-scale-in shadow-2xl">
         <h1 className="text-4xl font-bold text-[#2C3E50] mb-4 tracking-tight">
-          ✨ 发现你的旅行风格
+          ✨ 趣友 - 根据兴趣匹配交友
         </h1>
         <p className="text-gray-700 max-w-2xl mx-auto text-lg leading-relaxed mb-6">
-          完成性格测试，了解你的旅行偏好，找到志同道合的驴友
+          完成兴趣问卷，发现志同道合的朋友，根据兴趣进行匹配交友
         </p>
         <Button
           onClick={() => navigate('/my-quizzes')}
@@ -144,7 +144,7 @@ export default function HomePage() {
             </div>
             <div>
               <h4 className="font-bold text-[#2C3E50] mb-2 text-lg">完成测试</h4>
-              <p className="text-sm text-gray-700 leading-relaxed">回答10道题目，发现你的旅行风格</p>
+              <p className="text-sm text-gray-700 leading-relaxed">回答题目，发现你的兴趣类型，匹配志同道合的朋友</p>
             </div>
           </div>
           <div className="flex items-start gap-4 p-4 rounded-2xl hover:bg-white/40 transition-all duration-300 hover:scale-105 cursor-default">

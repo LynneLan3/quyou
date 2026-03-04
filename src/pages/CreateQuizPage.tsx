@@ -302,7 +302,7 @@ export default function CreateQuizPage() {
             <Label htmlFor="title">问卷名称 *</Label>
             <Input
               id="title"
-              placeholder="例如：旅行风格测试"
+              placeholder="例如：兴趣匹配问卷"
               value={quizTitle}
               onChange={(e) => setQuizTitle(e.target.value)}
               maxLength={50}

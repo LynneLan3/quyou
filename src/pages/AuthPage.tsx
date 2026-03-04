@@ -22,7 +22,7 @@ export default function AuthPage() {
     const fromUserId = searchParams.get('from');
     const hasQuizRedirect = redirect?.includes('/quiz/');
     if (fromUserId || hasQuizRedirect) {
-      setRedirectMessage('朋友邀请你参与旅行风格测试，请先登录或注册');
+      setRedirectMessage('朋友邀请你参与兴趣问卷，请先登录或注册');
     }
   }, [searchParams]);
 
@@ -148,9 +148,12 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-scale-in">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-4 mb-10">
-          <ClipboardList className="w-12 h-12 text-[#2D5A27] animate-float drop-shadow-lg" />
-          <h1 className="text-4xl font-bold text-white drop-shadow-2xl tracking-tight">驴友匹配</h1>
+        <div className="flex flex-col items-center gap-2 mb-10">
+          <div className="flex items-center gap-4">
+            <ClipboardList className="w-12 h-12 text-[#2D5A27] animate-float drop-shadow-lg" />
+            <h1 className="text-4xl font-bold text-white drop-shadow-2xl tracking-tight">趣友</h1>
+          </div>
+          <p className="text-white/90 text-sm drop-shadow-lg">根据兴趣进行匹配交友</p>
         </div>
 
         <Card className="glass-card shadow-2xl border-0">
@@ -165,8 +168,8 @@ export default function AuthPage() {
           </CardTitle>
           <CardDescription className="text-gray-600 text-base">
             {isLogin 
-              ? '登录后继续探索你的旅行风格' 
-              : '注册后发现志同道合的旅行伙伴'}
+              ? '登录后继续探索兴趣问卷，发现志同道合的朋友' 
+              : '注册后参与兴趣问卷，根据兴趣匹配交友'}
           </CardDescription>
         </CardHeader>
           
@@ -228,7 +231,7 @@ export default function AuthPage() {
 
         <div className="text-center mt-8 glass rounded-2xl p-4 shadow-lg">
           <p className="text-sm text-gray-700 font-medium">
-            ✈️ 完成测试，发现你的旅行风格，找到志同道合的伙伴
+            ✨ 完成测试，根据兴趣发现志同道合的朋友
           </p>
         </div>
       </div>

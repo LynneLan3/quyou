@@ -70,7 +70,7 @@ export default function Layout({ user }: LayoutProps) {
             {/* Logo - 添加动画效果 */}
             <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-all duration-300 hover:scale-105">
               <ClipboardList className="w-6 h-6 animate-float" />
-              <span className="text-xl font-bold tracking-wide">驴友匹配</span>
+              <span className="text-xl font-bold tracking-wide">趣友</span>
             </Link>
 
             {/* 导航链接 */}

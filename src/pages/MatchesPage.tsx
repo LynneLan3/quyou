@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { getCurrentUser } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -58,6 +58,7 @@ export default function MatchesPage() {
     bio?: string | null;
   } | null>(null);
   const [loadingContact, setLoadingContact] = useState(false);
+  const navigate = useNavigate();
 
   // 根据筛选条件过滤匹配记录
   const filteredMatches = matches.filter(match => {
@@ -325,6 +326,14 @@ export default function MatchesPage() {
     }
   };
 
+  const goToMatchAnswers = (match: MatchWithDetails) => {
+    if (!match.otherResult?.answers || !match.quiz_id) {
+      toast.error('暂无对方答题数据');
+      return;
+    }
+    navigate(`/match-answers/${match.id}`);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -442,8 +451,14 @@ export default function MatchesPage() {
                       <span className="font-medium text-[#2C3E50]">{match.quizTitle}</span>
                     </div>
 
-                    {/* 匹配度 */}
-                    <div className="mb-4 p-4 glass rounded-2xl">
+                    {/* 匹配度（点击可查看对方完整答案） */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => goToMatchAnswers(match)}
+                      onKeyDown={(e) => e.key === 'Enter' && goToMatchAnswers(match)}
+                      className="mb-4 p-4 glass rounded-2xl cursor-pointer hover:ring-2 hover:ring-[#2D5A27]/30 transition-all"
+                    >
                       <div className="flex items-center gap-3 mb-2">
                         <Award className="w-5 h-5 text-[#2D5A27]" />
                         <span className="text-sm text-gray-700 font-semibold">匹配度</span>
@@ -462,6 +477,7 @@ export default function MatchesPage() {
                           />
                         </div>
                       </div>
+                      <p className="text-xs text-gray-500 mt-2">点击可查看答案详情</p>
                     </div>
 
                     {/* 答题结果 */}

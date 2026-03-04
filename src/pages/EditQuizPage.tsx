@@ -329,7 +329,7 @@ export default function EditQuizPage() {
       {/* 标题栏 */}
       <div className="flex items-center justify-between glass rounded-2xl p-6 shadow-xl">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/my-quizzes')}>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/my-quizzes', { state: { tab: 'created' } })}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             返回
           </Button>
@@ -361,7 +361,7 @@ export default function EditQuizPage() {
             <Label htmlFor="title">问卷名称 *</Label>
             <Input
               id="title"
-              placeholder="例如：旅行风格测试"
+              placeholder="例如：兴趣匹配问卷"
               value={quizTitle}
               onChange={(e) => setQuizTitle(e.target.value)}
               maxLength={50}

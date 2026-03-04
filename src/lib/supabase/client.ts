@@ -11,6 +11,13 @@ const FETCH_RETRY_COUNT = 2;
 /** 重试前等待（毫秒） */
 const FETCH_RETRY_DELAY_MS = 1500;
 
+/** 获取请求的 URL 字符串，用于判断是否为 token 刷新 */
+function getRequestUrl(input: RequestInfo | URL): string {
+  if (typeof input === 'string') return input;
+  if (input instanceof URL) return input.href;
+  return input.url;
+}
+
 /**
  * 带超时 + 重试的 fetch，缓解网络不稳定或访问慢导致的 ERR_TIMED_OUT / Failed to fetch
  */
@@ -37,6 +44,11 @@ async function fetchWithTimeoutAndRetry(
     if (isRetryable && retriesLeft > 0) {
       await new Promise((r) => setTimeout(r, FETCH_RETRY_DELAY_MS));
       return fetchWithTimeoutAndRetry(input, init, retriesLeft - 1);
+    }
+    // 若为 token 刷新请求且连接失败（如项目暂停、网络不通），通知应用清除会话，避免无限重试刷屏
+    const url = getRequestUrl(input);
+    if (url.includes('/auth/v1/token') && url.includes('refresh_token')) {
+      window.dispatchEvent(new CustomEvent('supabase-connection-failed'));
     }
     throw e;
   }
@@ -69,6 +81,15 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     }
   }
 });
+
+// 连接失败（如项目暂停、网络不通）时清除本地 session，停止刷新重试并让用户重新登录
+if (typeof window !== 'undefined') {
+  window.addEventListener('supabase-connection-failed', () => {
+    supabase.auth.signOut().then(() => {
+      console.warn('[Supabase] 无法连接服务器，已退出登录，请检查网络或稍后重试。');
+    });
+  });
+}
 
 // 认证相关函数
 export async function signUpWithEmail(email: string, password: string) {
@@ -107,7 +128,7 @@ export async function createUserProfile(userId: string, email: string) {
         {
           id: userId,
           nickname: defaultNickname,
-          bio: '新用户，期待发现更多旅行伙伴！',
+          bio: '新用户，期待发现更多志同道合的朋友！',
           contact_info: null,
           avatar_url: defaultAvatarUrl,
           gender: 'female', // 默认性别为女性

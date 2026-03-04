@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 // 页面组件
 import HomePage from './pages/HomePage';
@@ -14,6 +15,8 @@ import AuthPage from './pages/AuthPage';
 import CreateQuizPage from './pages/CreateQuizPage';
 import MyQuizzesPage from './pages/MyQuizzesPage';
 import EditQuizPage from './pages/EditQuizPage';
+import MatchAnswersPage from './pages/MatchAnswersPage';
+import CompletedQuizDetailPage from './pages/CompletedQuizDetailPage';
 import Layout from './components/Layout';
 
 /** 未登录时跳转到登录页，并带上当前路径作为 redirect，以便登录后回到问卷等页面 */
@@ -26,6 +29,15 @@ function AuthRedirect() {
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // 无法连接 Supabase（如项目暂停、网络不通）时提示用户
+  useEffect(() => {
+    const onConnectionFailed = () => {
+      toast.error('无法连接服务器，已退出登录。请检查网络或稍后重试。若使用 Supabase 免费版，请在控制台恢复项目。');
+    };
+    window.addEventListener('supabase-connection-failed', onConnectionFailed);
+    return () => window.removeEventListener('supabase-connection-failed', onConnectionFailed);
+  }, []);
 
   useEffect(() => {
     // 获取当前用户并处理重定向
@@ -61,7 +73,7 @@ function App() {
                 {
                   id: userId,
                   nickname: defaultNickname,
-                  bio: '新用户，期待发现更多旅行伙伴！',
+                  bio: '新用户，期待发现更多志同道合的朋友！',
                   contact_info: null,
                   avatar_url: defaultAvatarUrl,
                   gender: 'female',
@@ -121,9 +133,11 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="create-quiz" element={<CreateQuizPage />} />
           <Route path="my-quizzes" element={<MyQuizzesPage />} />
+          <Route path="my-quizzes/result/:resultId" element={<CompletedQuizDetailPage />} />
           <Route path="edit-quiz/:quizId" element={<EditQuizPage />} />
           <Route path="quiz/:quizId" element={<QuizPage />} />
           <Route path="result/:resultId" element={<ResultPage />} />
+          <Route path="match-answers/:matchId" element={<MatchAnswersPage />} />
           <Route path="matches" element={<MatchesPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
