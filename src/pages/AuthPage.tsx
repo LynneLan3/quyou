@@ -165,7 +165,7 @@ export default function AuthPage() {
         <div className="flex flex-col items-center gap-2 mb-10">
           <div className="flex items-center gap-4">
             <ClipboardList className="w-12 h-12 text-[#2D5A27] animate-float drop-shadow-lg" />
-            <h1 className="text-4xl font-bold text-white drop-shadow-2xl tracking-tight">趣友</h1>
+            <h1 className="text-4xl font-bold text-white drop-shadow-2xl tracking-tight">友趣</h1>
           </div>
           <p className="text-white/90 text-sm drop-shadow-lg">根据兴趣进行匹配交友</p>
         </div>

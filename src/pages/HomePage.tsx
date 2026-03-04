@@ -82,7 +82,7 @@ export default function HomePage() {
       {/* 欢迎区域 - 磨玻璃卡片 */}
       <div className="text-center py-12 glass rounded-3xl animate-scale-in shadow-2xl">
         <h1 className="text-4xl font-bold text-[#2C3E50] mb-4 tracking-tight">
-          ✨ 趣友 - 根据兴趣匹配交友
+          ✨ 友趣 - 根据兴趣匹配交友
         </h1>
         <p className="text-gray-700 max-w-2xl mx-auto text-lg leading-relaxed mb-6">
           完成兴趣问卷，发现志同道合的朋友，根据兴趣进行匹配交友
