@@ -179,16 +179,19 @@ export default function CompletedQuizDetailPage() {
     return rule?.description || '';
   };
 
+  const encodedFrom = result ? encodeFromParam(result.user_id) : '';
   const shareUrl = result
-    ? `${window.location.origin}/quiz/${result.quiz_id}?from=${encodeFromParam(result.user_id)}`
+    ? `${window.location.origin}/quiz/${result.quiz_id}?from=${encodedFrom}`
     : '';
   
   if (result) {
-    console.log('📱 [CompletedQuizDetail二维码] shareUrl:', shareUrl);
-    console.log('📱 [CompletedQuizDetail二维码] window.location.origin:', window.location.origin);
-    console.log('📱 [CompletedQuizDetail二维码] result.quiz_id:', result.quiz_id);
-    console.log('📱 [CompletedQuizDetail二维码] result.user_id:', result.user_id);
-    console.log('📱 [CompletedQuizDetail二维码] encodeFromParam(result.user_id):', encodeFromParam(result.user_id));
+    console.log('📱 [CompletedQuizDetail二维码生成]');
+    console.log('  - window.location.origin:', window.location.origin);
+    console.log('  - result.quiz_id:', result.quiz_id);
+    console.log('  - result.user_id:', result.user_id);
+    console.log('  - encodedFrom:', encodedFrom);
+    console.log('  - shareUrl:', shareUrl);
+    console.log('  - shareUrl.length:', shareUrl.length);
   }
 
   const handleCopyLink = () => {

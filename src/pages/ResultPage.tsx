@@ -458,13 +458,16 @@ export default function ResultPage() {
     );
   }
 
-  const shareUrl = `${window.location.origin}/quiz/${result.quiz_id}?from=${encodeFromParam(result.user_id)}`;
+  const encodedFrom = encodeFromParam(result.user_id);
+  const shareUrl = `${window.location.origin}/quiz/${result.quiz_id}?from=${encodedFrom}`;
   
-  console.log('📱 [二维码] shareUrl:', shareUrl);
-  console.log('📱 [二维码] window.location.origin:', window.location.origin);
-  console.log('📱 [二维码] result.quiz_id:', result.quiz_id);
-  console.log('📱 [二维码] result.user_id:', result.user_id);
-  console.log('📱 [二维码] encodeFromParam(result.user_id):', encodeFromParam(result.user_id));
+  console.log('📱 [二维码生成]');
+  console.log('  - window.location.origin:', window.location.origin);
+  console.log('  - result.quiz_id:', result.quiz_id);
+  console.log('  - result.user_id:', result.user_id);
+  console.log('  - encodedFrom:', encodedFrom);
+  console.log('  - shareUrl:', shareUrl);
+  console.log('  - shareUrl.length:', shareUrl.length);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in-up">
