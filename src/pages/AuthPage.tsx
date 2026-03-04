@@ -6,15 +6,19 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { ClipboardList, Loader2 } from 'lucide-react';
+import { ClipboardList, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const [redirectMessage, setRedirectMessage] = useState('');
+  /** 登录失败后提示新用户设置密码（显示确认密码并走注册） */
+  const [isNewUserPrompt, setIsNewUserPrompt] = useState(false);
 
   useEffect(() => {
     // 检查是否有邀请参数：来自 redirect（如 /quiz/xxx?from=yyy）或单独 from
@@ -26,39 +30,33 @@ export default function AuthPage() {
     }
   }, [searchParams]);
 
+  const needConfirmPassword = !isLogin || isNewUserPrompt;
+  const isInvalidCreds = (msg: string) =>
+    /Invalid login|Invalid API|Unauthorized|credentials/i.test(msg);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 防止重复提交
     if (loading) return;
-    
+
+    if (needConfirmPassword) {
+      if (password !== passwordConfirm) {
+        toast.error('两次输入的密码不一致，请检查');
+        return;
+      }
+      if (password.length < 6) {
+        toast.error('密码至少 6 位');
+        return;
+      }
+    }
+
     setLoading(true);
+    setIsNewUserPrompt(false);
 
     try {
-      if (isLogin) {
-        console.log('Attempting login with email:', email);
+      if (isLogin && !isNewUserPrompt) {
+        // 先尝试登录：已有账号则直接登录成功
         const { error } = await signInWithEmail(email, password);
-        console.log('Login result:', { error: error ? 'failed' : 'success' });
-        
-        if (error) {
-          console.error('Login error details:', error);
-          const errorMessage = (error as any).message || '登录失败';
-          const errorName = (error as any).name || '';
-          if (errorMessage.includes('Invalid login') || errorMessage.includes('Invalid API') || errorMessage.includes('Unauthorized')) {
-            toast.error('邮箱或密码错误');
-          } else if (errorMessage.includes('credentials')) {
-            toast.error('配置错误，请联系管理员');
-          } else if (
-            errorMessage.includes('Failed to fetch') ||
-            errorName.includes('AuthRetryableFetchError') ||
-            errorMessage.includes('timeout') ||
-            errorMessage.includes('TIMED_OUT')
-          ) {
-            toast.error('网络超时或无法连接，请检查网络后重试。若在中国大陆可尝试使用 VPN。');
-          } else {
-            toast.error(errorMessage);
-          }
-        } else {
+        if (!error) {
           toast.success('登录成功！');
           const redirectTo = searchParams.get('redirect');
           if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
@@ -66,20 +64,43 @@ export default function AuthPage() {
           } else {
             window.location.href = '/';
           }
+          return;
         }
-      } else {
-        console.log('Attempting signup with email:', email);
-        const { data: signUpData, error } = await signUpWithEmail(email, password);
+        const errorMessage = (error as any).message || '';
+        const errorName = (error as any).name || '';
+        if (isInvalidCreds(errorMessage) || errorName.includes('Auth')) {
+          // 未找到账号或密码错误 → 提示新用户设置密码
+          setIsNewUserPrompt(true);
+          toast.info('未找到该账号，请设置密码完成注册（请再输入一次密码确认）');
+          setLoading(false);
+          return;
+        }
+        if (
+          errorMessage.includes('Failed to fetch') ||
+          errorName.includes('AuthRetryableFetchError') ||
+          /timeout|TIMED_OUT/i.test(errorMessage)
+        ) {
+          toast.error('网络超时或无法连接，请检查网络后重试。若在中国大陆可尝试使用 VPN。');
+        } else {
+          toast.error(errorMessage);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // 注册：新用户设置密码（双密码已校验）
+      console.log('Attempting signup with email:', email);
+      const { data: signUpData, error } = await signUpWithEmail(email, password);
         console.log('Signup result:', { error: error ? 'failed' : 'success', hasUser: !!signUpData?.user, hasSession: !!signUpData?.session });
         
         if (error) {
           console.error('Signup error details:', error);
           const errorMessage = (error as any).message || '注册失败';
           const errorName = (error as any).name || '';
-          if (errorMessage.includes('already registered')) {
-            toast.error('该邮箱已注册');
-          } else if (errorMessage.includes('rate limit') || errorMessage.includes('429')) {
-            toast.error('注册过于频繁，请1分钟后再试');
+          if (errorMessage.includes('already registered') || errorMessage.includes('already been registered')) {
+            toast.error('该邮箱已注册，请检查密码或直接登录');
+          } else if (errorMessage.includes('注册请求过于频繁') || errorMessage.includes('rate limit') || errorMessage.includes('429')) {
+            toast.error('注册请求过于频繁，请稍后再试。若该邮箱已注册请直接登录。');
           } else if (errorMessage.includes('credentials')) {
             toast.error('配置错误，请联系管理员');
           } else if (
@@ -135,7 +156,6 @@ export default function AuthPage() {
           };
           waitForSession();
         }
-      }
     } catch (error) {
       console.error('Auth operation failed:', error);
       toast.error('操作失败，请重试');
@@ -164,12 +184,14 @@ export default function AuthPage() {
             </div>
           )}
           <CardTitle className="text-3xl text-[#2C3E50] font-bold mb-2">
-            {isLogin ? '👋 欢迎回来' : '🌟 创建账号'}
+            {isNewUserPrompt ? '🔐 设置密码完成注册' : isLogin ? '👋 欢迎回来' : '🌟 创建账号'}
           </CardTitle>
           <CardDescription className="text-gray-600 text-base">
-            {isLogin 
-              ? '登录后继续探索兴趣问卷，发现志同道合的朋友' 
-              : '注册后参与兴趣问卷，根据兴趣匹配交友'}
+            {isNewUserPrompt
+              ? '请再次输入密码以确认，完成注册'
+              : isLogin 
+                ? '登录后继续探索兴趣问卷，发现志同道合的朋友' 
+                : '注册后参与兴趣问卷，根据兴趣匹配交友'}
           </CardDescription>
         </CardHeader>
           
@@ -189,17 +211,56 @@ export default function AuthPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-semibold text-gray-700">密码</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="至少6位密码"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-14 glass-input text-base"
-                  disabled={loading}
-                />
+                <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                  {needConfirmPassword ? '设置密码' : '密码'}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="至少6位密码"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-14 glass-input text-base pr-12"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 rounded"
+                    aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
+
+              {needConfirmPassword && (
+                <div className="space-y-2">
+                  <Label htmlFor="passwordConfirm" className="text-sm font-semibold text-gray-700">
+                    确认密码
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="passwordConfirm"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="请再次输入密码"
+                      value={passwordConfirm}
+                      onChange={(e) => setPasswordConfirm(e.target.value)}
+                      className="h-14 glass-input text-base pr-12"
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1 rounded"
+                      aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -208,8 +269,10 @@ export default function AuthPage() {
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
+                ) : needConfirmPassword ? (
+                  isNewUserPrompt ? '设置密码并注册' : '注册'
                 ) : (
-                  isLogin ? '登录' : '注册'
+                  '登录'
                 )}
               </Button>
             </form>
@@ -217,7 +280,11 @@ export default function AuthPage() {
             <div className="mt-8 text-center">
               <button
                 type="button"
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setIsNewUserPrompt(false);
+                  setPasswordConfirm('');
+                }}
                 className="text-[#2D5A27] hover:text-[#234a1f] font-semibold text-base transition-all duration-300 hover:scale-105 inline-block"
                 disabled={loading}
               >

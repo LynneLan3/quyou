@@ -102,9 +102,9 @@ export async function signUpWithEmail(email: string, password: string) {
     
     if (error) {
       console.error('Sign up error:', error);
-      // 处理频率限制错误
-      if (error.message?.includes('rate limit') || error.status === 429) {
-        throw new Error('注册过于频繁，请稍后再试');
+      // 频率限制时不抛错，直接返回，由 AuthPage 统一提示
+      if (error.message?.includes('rate limit') || error.message?.includes('rate limit exceeded') || error.status === 429) {
+        return { data: null, error: { ...error, message: '注册请求过于频繁，请稍后再试。若该邮箱已注册请直接登录。' } as any };
       }
     } else {
       console.log('Sign up successful:', data);
