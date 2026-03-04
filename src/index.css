@@ -242,3 +242,12 @@
     left: 100%;
   }
 }
+
+/* Toast 固定在页面正中，覆盖 sonner 默认定位 */
+[data-sonner-toaster] {
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+}

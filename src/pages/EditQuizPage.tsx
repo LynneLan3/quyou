@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import { Loader2, Plus, Trash2, Save, ArrowLeft, Globe, Lock } from 'lucide-react';
 
 interface QuestionData {
@@ -62,7 +62,7 @@ export default function EditQuizPage() {
 
       if (quizError) throw quizError;
       if ((quizData as any).creator_id !== user.id) {
-        toast.error('无权编辑此问卷');
+        messageToast.error('无权编辑此问卷');
         navigate('/my-quizzes');
         return;
       }
@@ -113,7 +113,7 @@ export default function EditQuizPage() {
       setQuestions(loadedQuestions);
     } catch (err: any) {
       console.error('加载问卷失败:', err);
-      toast.error('加载失败');
+      messageToast.error('加载失败');
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ export default function EditQuizPage() {
   // ---- 题目操作 ----
   const addQuestion = () => {
     if (questions.length >= 10) {
-      toast.error('最多只能有10道题目');
+      messageToast.error('最多只能有10道题目');
       return;
     }
     const newId = `new-${Date.now()}`;
@@ -143,7 +143,7 @@ export default function EditQuizPage() {
 
   const removeQuestion = (questionId: string) => {
     if (questions.length <= 1) {
-      toast.error('至少保留1道题目');
+      messageToast.error('至少保留1道题目');
       return;
     }
     setQuestions(questions.filter((q) => q.id !== questionId));
@@ -158,7 +158,7 @@ export default function EditQuizPage() {
       questions.map((q) => {
         if (q.id !== questionId) return q;
         if (q.options.length >= 6) {
-          toast.error('每道题最多6个选项');
+          messageToast.error('每道题最多6个选项');
           return q;
         }
         const newOId = `${questionId}-o-${Date.now()}`;
@@ -184,7 +184,7 @@ export default function EditQuizPage() {
       questions.map((q) => {
         if (q.id !== questionId) return q;
         if (q.options.length <= 2) {
-          toast.error('每道题至少2个选项');
+          messageToast.error('每道题至少2个选项');
           return q;
         }
         return { ...q, options: q.options.filter((o) => o.id !== optionId) };
@@ -214,13 +214,13 @@ export default function EditQuizPage() {
 
   // ---- 校验 ----
   const validateForm = () => {
-    if (!quizTitle.trim()) { toast.error('请输入问卷名称'); return false; }
-    if (!quizDescription.trim()) { toast.error('请输入问卷简介'); return false; }
+    if (!quizTitle.trim()) { messageToast.error('请输入问卷名称'); return false; }
+    if (!quizDescription.trim()) { messageToast.error('请输入问卷简介'); return false; }
     for (const q of questions) {
-      if (!q.question_text.trim()) { toast.error('请填写所有题目内容'); return false; }
-      if (q.options.length < 2) { toast.error('每道题至少2个选项'); return false; }
+      if (!q.question_text.trim()) { messageToast.error('请填写所有题目内容'); return false; }
+      if (q.options.length < 2) { messageToast.error('每道题至少2个选项'); return false; }
       for (const o of q.options) {
-        if (!o.option_text.trim()) { toast.error('请填写所有选项内容'); return false; }
+        if (!o.option_text.trim()) { messageToast.error('请填写所有选项内容'); return false; }
       }
     }
     return true;
@@ -306,11 +306,11 @@ export default function EditQuizPage() {
         }
       }
 
-      toast.success('问卷保存成功！');
+      messageToast.success('问卷保存成功！');
       navigate('/my-quizzes');
     } catch (err: any) {
       console.error('保存失败:', err);
-      toast.error(err.message || '保存失败，请重试');
+      messageToast.error(err.message || '保存失败，请重试');
     } finally {
       setSaving(false);
     }

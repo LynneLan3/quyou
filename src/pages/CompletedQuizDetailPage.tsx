@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase/client';
 import { getCurrentUser } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import {
   Loader2,
   ArrowLeft,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import * as htmlToImage from 'html-to-image';
+import { encodeFromParam } from '@/lib/shareLink';
 
 interface QuizResult {
   id: string;
@@ -86,7 +87,7 @@ export default function CompletedQuizDetailPage() {
       try {
         const user = await getCurrentUser();
         if (!user) {
-          toast.error('请先登录');
+          messageToast.error('请先登录');
           navigate('/auth');
           return;
         }
@@ -111,13 +112,13 @@ export default function CompletedQuizDetailPage() {
           .single();
 
         if (error || !data) {
-          toast.error('结果不存在');
+          messageToast.error('结果不存在');
           navigate('/my-quizzes');
           return;
         }
 
         if ((data as any).user_id !== user.id) {
-          toast.error('无权查看');
+          messageToast.error('无权查看');
           navigate('/my-quizzes');
           return;
         }
@@ -162,7 +163,7 @@ export default function CompletedQuizDetailPage() {
         }
       } catch (e) {
         console.error(e);
-        toast.error('加载失败');
+        messageToast.error('加载失败');
         navigate('/my-quizzes');
       } finally {
         setLoading(false);
@@ -179,7 +180,7 @@ export default function CompletedQuizDetailPage() {
   };
 
   const shareUrl = result
-    ? `${window.location.origin}/quiz/${result.quiz_id}?from=${result.user_id}`
+    ? `${window.location.origin}/quiz/${result.quiz_id}?from=${encodeFromParam(result.user_id)}`
     : '';
 
   const handleCopyLink = () => {
@@ -187,7 +188,7 @@ export default function CompletedQuizDetailPage() {
     const copyText = `好友邀请你来答题，点击进入：${shareUrl}`;
     navigator.clipboard.writeText(copyText);
     setCopied(true);
-    toast.success('链接已复制到剪贴板');
+    messageToast.success('链接已复制到剪贴板');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -205,10 +206,10 @@ export default function CompletedQuizDetailPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success('分享卡片已保存');
+      messageToast.success('分享卡片已保存');
     } catch (err) {
       console.error(err);
-      toast.error('生成分享卡片失败');
+      messageToast.error('生成分享卡片失败');
     } finally {
       setDownloadingCard(false);
     }

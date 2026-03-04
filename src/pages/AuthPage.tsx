@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import { ClipboardList, Loader2, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthPage() {
@@ -40,11 +40,11 @@ export default function AuthPage() {
 
     if (needConfirmPassword) {
       if (password !== passwordConfirm) {
-        toast.error('两次输入的密码不一致，请检查');
+        messageToast.error('两次输入的密码不一致，请检查');
         return;
       }
       if (password.length < 6) {
-        toast.error('密码至少 6 位');
+        messageToast.error('密码至少 6 位');
         return;
       }
     }
@@ -57,7 +57,7 @@ export default function AuthPage() {
         // 先尝试登录：已有账号则直接登录成功
         const { error } = await signInWithEmail(email, password);
         if (!error) {
-          toast.success('登录成功！');
+          messageToast.success('登录成功！');
           const redirectTo = searchParams.get('redirect');
           if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
             window.location.href = redirectTo;
@@ -71,7 +71,7 @@ export default function AuthPage() {
         if (isInvalidCreds(errorMessage) || errorName.includes('Auth')) {
           // 未找到账号或密码错误 → 提示新用户设置密码
           setIsNewUserPrompt(true);
-          toast.info('未找到该账号，请设置密码完成注册（请再输入一次密码确认）');
+          messageToast.info('未找到该账号，请设置密码完成注册（请再输入一次密码确认）');
           setLoading(false);
           return;
         }
@@ -80,9 +80,9 @@ export default function AuthPage() {
           errorName.includes('AuthRetryableFetchError') ||
           /timeout|TIMED_OUT/i.test(errorMessage)
         ) {
-          toast.error('网络超时或无法连接，请检查网络后重试。若在中国大陆可尝试使用 VPN。');
+          messageToast.error('网络超时或无法连接，请检查网络后重试。若在中国大陆可尝试使用 VPN。');
         } else {
-          toast.error(errorMessage);
+          messageToast.error(errorMessage);
         }
         setLoading(false);
         return;
@@ -98,25 +98,25 @@ export default function AuthPage() {
           const errorMessage = (error as any).message || '注册失败';
           const errorName = (error as any).name || '';
           if (errorMessage.includes('already registered') || errorMessage.includes('already been registered')) {
-            toast.error('该邮箱已注册，请检查密码或直接登录');
+            messageToast.error('该邮箱已注册，请检查密码或直接登录');
           } else if (errorMessage.includes('注册请求过于频繁') || errorMessage.includes('rate limit') || errorMessage.includes('429')) {
-            toast.error('注册请求过于频繁，请稍后再试。若该邮箱已注册请直接登录。');
+            messageToast.error('注册请求过于频繁，请稍后再试。若该邮箱已注册请直接登录。');
           } else if (errorMessage.includes('credentials')) {
-            toast.error('配置错误，请联系管理员');
+            messageToast.error('配置错误，请联系管理员');
           } else if (
             errorMessage.includes('Failed to fetch') ||
             errorName.includes('AuthRetryableFetchError') ||
             errorMessage.includes('timeout') ||
             errorMessage.includes('TIMED_OUT')
           ) {
-            toast.error('网络超时或无法连接，请检查网络后重试。若在中国大陆可尝试使用 VPN。');
+            messageToast.error('网络超时或无法连接，请检查网络后重试。若在中国大陆可尝试使用 VPN。');
           } else {
-            toast.error(errorMessage);
+            messageToast.error(errorMessage);
           }
         } else if (signUpData?.session) {
           // 未开启邮箱确认时：直接有 session，立即写 profile 并跳转
           const redirectTo = searchParams.get('redirect');
-          toast.success(redirectTo?.includes('/quiz/') ? '注册成功！正在跳转到问卷…' : '注册成功！正在跳转…');
+          messageToast.success(redirectTo?.includes('/quiz/') ? '注册成功！正在跳转到问卷…' : '注册成功！正在跳转…');
           try {
             await createUserProfile(signUpData.session.user.id, email);
           } catch (_) {
@@ -129,11 +129,11 @@ export default function AuthPage() {
           }
         } else if (signUpData?.user) {
           // 开启了邮箱确认：user 存在但 session 为 null，需用户点击邮件链接后才会有 session
-          toast.success('注册成功！请查收邮件并点击链接完成验证，验证后可登录。');
+          messageToast.success('注册成功！请查收邮件并点击链接完成验证，验证后可登录。');
           // 不跳转，避免被 App 因无 session 重定向回 /auth
         } else {
           // 极少数情况：无 error 但无 user/session，短暂轮询 session 后决定
-          toast.success('注册请求已提交…');
+          messageToast.success('注册请求已提交…');
           const redirectTo = searchParams.get('redirect');
           const waitForSession = async (retries = 15) => {
             for (let i = 0; i < retries; i++) {
@@ -152,13 +152,13 @@ export default function AuthPage() {
               }
               await new Promise((r) => setTimeout(r, 300));
             }
-            toast.info('若已开启邮箱验证，请查收邮件完成验证后登录。');
+            messageToast.info('若已开启邮箱验证，请查收邮件完成验证后登录。');
           };
           waitForSession();
         }
     } catch (error) {
       console.error('Auth operation failed:', error);
-      toast.error('操作失败，请重试');
+      messageToast.error('操作失败，请重试');
     } finally {
       setLoading(false);
     }

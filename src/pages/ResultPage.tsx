@@ -7,11 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import { Loader2, Copy, Share2, Check, MapPin, Users, Award, ClipboardList } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import * as htmlToImage from 'html-to-image';
+import { encodeFromParam, decodeFromParam } from '@/lib/shareLink';
 
 interface QuizResult {
   id: string;
@@ -81,7 +82,7 @@ export default function ResultPage() {
       try {
         const user = await getCurrentUser();
         if (!user) {
-          toast.error('请先登录');
+          messageToast.error('请先登录');
           navigate('/auth');
           return;
         }
@@ -94,13 +95,11 @@ export default function ResultPage() {
           .single();
         setUserProfile(profileBasic);
 
-        // 获取from参数（从URL或sessionStorage）
-        const fromParam = searchParams.get('from') || sessionStorage.getItem(`from_${resultId}`);
-        console.log('🔍 [调试] from参数:', fromParam);
-        console.log('🔍 [调试] URL参数:', searchParams.get('from'));
-        console.log('🔍 [调试] sessionStorage:', sessionStorage.getItem(`from_${resultId}`));
-        if (fromParam) {
-          sessionStorage.setItem(`from_${resultId}`, fromParam);
+        // 获取 from 参数（从 URL 或 sessionStorage），解码为真实用户 id
+        const fromRaw = searchParams.get('from') || sessionStorage.getItem(`from_${resultId}`);
+        const fromParam = decodeFromParam(fromRaw);
+        if (fromRaw) {
+          sessionStorage.setItem(`from_${resultId}`, fromRaw);
         }
 
         // 获取答题结果
@@ -298,7 +297,7 @@ export default function ResultPage() {
         }
       } catch (error) {
         console.error('❌ [调试] 发生错误:', error);
-        toast.error('加载结果失败');
+        messageToast.error('加载结果失败');
       } finally {
         setLoading(false);
       }
@@ -312,7 +311,7 @@ export default function ResultPage() {
 
   const handleSaveProfile = async () => {
     if (!profile.nickname.trim()) {
-      toast.error('请输入昵称');
+      messageToast.error('请输入昵称');
       return;
     }
 
@@ -321,7 +320,7 @@ export default function ResultPage() {
     try {
       const user = await getCurrentUser();
       if (!user) {
-        toast.error('请先登录');
+        messageToast.error('请先登录');
         return;
       }
 
@@ -337,10 +336,10 @@ export default function ResultPage() {
       if (error) throw error;
 
       setHasProfile(true);
-      toast.success('资料保存成功！');
+      messageToast.success('资料保存成功！');
     } catch (error) {
       console.error('Error saving profile:', error);
-      toast.error('保存失败，请重试');
+      messageToast.error('保存失败，请重试');
     } finally {
       setSaving(false);
     }
@@ -351,12 +350,12 @@ export default function ResultPage() {
 
     const userId = result.user_id;
     const quizId = result.quiz_id;
-    const shareUrl = `${window.location.origin}/quiz/${quizId}?from=${userId}`;
+    const shareUrl = `${window.location.origin}/quiz/${quizId}?from=${encodeFromParam(userId)}`;
     const copyText = `好友邀请你来答题，点击进入：${shareUrl}`;
 
     navigator.clipboard.writeText(copyText);
     setCopied(true);
-    toast.success('链接已复制到剪贴板');
+    messageToast.success('链接已复制到剪贴板');
 
     setTimeout(() => setCopied(false), 2000);
   };
@@ -375,10 +374,10 @@ export default function ResultPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success('分享卡片已保存，快去发给朋友吧');
+      messageToast.success('分享卡片已保存，快去发给朋友吧');
     } catch (error) {
       console.error('生成分享卡片失败:', error);
-      toast.error('生成分享卡片失败，请稍后重试');
+      messageToast.error('生成分享卡片失败，请稍后重试');
     } finally {
       setDownloadingCard(false);
     }
@@ -394,7 +393,7 @@ export default function ResultPage() {
 
   const goToMatchAnswers = () => {
     if (!matchInfo?.matchId) {
-      toast.error('暂无匹配信息');
+      messageToast.error('暂无匹配信息');
       return;
     }
     navigate(`/match-answers/${matchInfo.matchId}`);
@@ -453,7 +452,7 @@ export default function ResultPage() {
     );
   }
 
-  const shareUrl = `${window.location.origin}/quiz/${result.quiz_id}?from=${result.user_id}`;
+  const shareUrl = `${window.location.origin}/quiz/${result.quiz_id}?from=${encodeFromParam(result.user_id)}`;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in-up">

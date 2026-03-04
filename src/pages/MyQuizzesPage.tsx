@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import {
   Loader2,
   ClipboardList,
@@ -71,7 +71,7 @@ export default function MyQuizzesPage() {
       ]);
     } catch (err) {
       console.error('加载数据失败:', err);
-      toast.error('加载数据失败');
+      messageToast.error('加载数据失败');
     } finally {
       setLoading(false);
     }

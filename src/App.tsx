@@ -2,8 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
+import { MessageModalProvider, messageToast } from '@/components/MessageModal';
 
 // 页面组件
 import HomePage from './pages/HomePage';
@@ -22,6 +21,16 @@ import Layout from './components/Layout';
 /** 未登录时跳转到登录页，并带上当前路径作为 redirect，以便登录后回到问卷等页面 */
 function AuthRedirect() {
   const location = useLocation();
+  // 问卷邀请链接：登录后可能丢失 query，先把 from 存到 sessionStorage
+  if (location.pathname.startsWith('/quiz/') && location.search) {
+    const quizId = location.pathname.split('/')[2];
+    const from = new URLSearchParams(location.search).get('from');
+    if (quizId && from) {
+      try {
+        sessionStorage.setItem(`from_quiz_${quizId}`, from);
+      } catch (_) {}
+    }
+  }
   const to = `/auth?redirect=${encodeURIComponent(location.pathname + location.search)}`;
   return <Navigate to={to} replace />;
 }
@@ -33,7 +42,7 @@ function App() {
   // 无法连接 Supabase（如项目暂停、网络不通）时提示用户
   useEffect(() => {
     const onConnectionFailed = () => {
-      toast.error('无法连接服务器，已退出登录。请检查网络或稍后重试。若使用 Supabase 免费版，请在控制台恢复项目。');
+      messageToast.error('无法连接服务器，已退出登录。请检查网络或稍后重试。若使用 Supabase 免费版，请在控制台恢复项目。');
     };
     window.addEventListener('supabase-connection-failed', onConnectionFailed);
     return () => window.removeEventListener('supabase-connection-failed', onConnectionFailed);
@@ -125,9 +134,9 @@ function App() {
   }
 
   return (
-    <Router>
-      <Toaster position="top-center" />
-      <Routes>
+    <MessageModalProvider>
+      <Router>
+        <Routes>
         <Route path="/auth" element={user ? <Navigate to="/" /> : <AuthPage />} />
         <Route path="/" element={user ? <Layout user={user} /> : <AuthRedirect />}>
           <Route index element={<HomePage />} />
@@ -143,6 +152,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </MessageModalProvider>
   );
 }
 

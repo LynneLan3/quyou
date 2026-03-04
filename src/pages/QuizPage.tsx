@@ -7,8 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import { Loader2, ChevronRight } from 'lucide-react';
+import { decodeFromParam, encodeFromParam } from '@/lib/shareLink';
 
 interface QuestionWithOptions {
   question_code: string;
@@ -38,7 +39,9 @@ export default function QuizPage() {
   const { quizId } = useParams<{ quizId: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const fromUserId = searchParams.get('from');
+  // 优先用 URL 的 from（分享人 id，已编码），登录跳转后若丢失则从 sessionStorage 恢复；解码得到真实用户 id
+  const fromRaw = searchParams.get('from') || (quizId ? sessionStorage.getItem(`from_quiz_${quizId}`) : null);
+  const fromUserId = decodeFromParam(fromRaw);
 
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [questions, setQuestions] = useState<QuestionWithOptions[]>([]);
@@ -131,7 +134,7 @@ export default function QuizPage() {
         setQuestions(formattedQuestions);
       } catch (error) {
         console.error('Error fetching quiz:', error);
-        toast.error('加载问卷失败');
+        messageToast.error('加载问卷失败');
       } finally {
         setLoading(false);
       }
@@ -146,7 +149,7 @@ export default function QuizPage() {
 
   const handleNext = async () => {
     if (!selectedOption) {
-      toast.error('请选择一个选项');
+      messageToast.error('请选择一个选项');
       return;
     }
 
@@ -174,7 +177,7 @@ export default function QuizPage() {
     try {
       const user = await getCurrentUser();
       if (!user) {
-        toast.error('请先登录');
+        messageToast.error('请先登录');
         return;
       }
 
@@ -243,22 +246,24 @@ export default function QuizPage() {
           } as any);
 
         if (matchError && !matchError.message.includes('unique constraint') && !matchError.message.includes('duplicate')) {
-          toast.warning('答题已保存，但匹配记录创建失败。请在「我的匹配」中查看，或联系管理员检查数据库权限。');
+          messageToast.warning('答题已保存，但匹配记录创建失败。请在「我的匹配」中查看，或联系管理员检查数据库权限。');
+        } else {
+          try { sessionStorage.removeItem(`from_quiz_${quizId}`); } catch (_) {}
         }
       }
 
-      toast.success('答题完成！');
+      messageToast.success('答题完成！');
       // 如果是受邀答题，跳转时携带from参数
       console.log('🔍 [QuizPage调试] fromUserId:', fromUserId);
       console.log('🔍 [QuizPage调试] resultData:', resultData);
-      const resultPath = fromUserId 
-        ? `/result/${(resultData as any)?.id}?from=${fromUserId}`
+      const resultPath = fromUserId
+        ? `/result/${(resultData as any)?.id}?from=${encodeFromParam(fromUserId)}`
         : `/result/${(resultData as any)?.id}`;
       console.log('🔍 [QuizPage调试] 跳转路径:', resultPath);
       navigate(resultPath);
     } catch (error: any) {
       const msg = error?.message || String(error);
-      toast.error(msg ? `提交失败：${msg.slice(0, 80)}${msg.length > 80 ? '…' : ''}` : '提交失败，请重试');
+      messageToast.error(msg ? `提交失败：${msg.slice(0, 80)}${msg.length > 80 ? '…' : ''}` : '提交失败，请重试');
     } finally {
       setSubmitting(false);
     }

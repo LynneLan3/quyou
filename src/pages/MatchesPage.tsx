@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import { Loader2, Users, Heart, Check, Eye, Copy, ClipboardList, Award, XCircle } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -107,7 +107,7 @@ export default function MatchesPage() {
       try {
         const user = await getCurrentUser();
         if (!user) {
-          toast.error('请先登录');
+          messageToast.error('请先登录');
           return;
         }
         setCurrentUserId(user.id);
@@ -183,7 +183,7 @@ export default function MatchesPage() {
         setMatches(enrichedMatches);
       } catch (error) {
         console.error('Error fetching matches:', error);
-        toast.error('加载匹配记录失败');
+        messageToast.error('加载匹配记录失败');
       } finally {
         setLoading(false);
       }
@@ -221,7 +221,7 @@ export default function MatchesPage() {
       if (error) throw error;
       if (!updated) throw new Error('更新失败');
 
-      toast.success(willBeMatched ? '匹配成功！' : '已发送同意请求');
+      messageToast.success(willBeMatched ? '匹配成功！' : '已发送同意请求');
 
       // 更新本地状态
       setMatches(matches.map(m => {
@@ -236,7 +236,7 @@ export default function MatchesPage() {
       }));
     } catch (error) {
       console.error('Error updating match:', error);
-      toast.error('操作失败，请重试');
+      messageToast.error('操作失败，请重试');
     }
   };
 
@@ -255,7 +255,7 @@ export default function MatchesPage() {
       if (error) throw error;
       if (!updated) throw new Error('更新失败');
 
-      toast.success('已拒绝该匹配请求');
+      messageToast.success('已拒绝该匹配请求');
 
       // 更新本地状态，而不是移除
       setMatches(matches.map(m => {
@@ -266,7 +266,7 @@ export default function MatchesPage() {
       }));
     } catch (error) {
       console.error('Error rejecting match:', error);
-      toast.error('拒绝失败，请重试');
+      messageToast.error('拒绝失败，请重试');
     }
   };
 
@@ -289,7 +289,7 @@ export default function MatchesPage() {
       setContactInfo(data);
     } catch (error) {
       console.error('Error fetching contact:', error);
-      toast.error('获取联系方式失败');
+      messageToast.error('获取联系方式失败');
     } finally {
       setLoadingContact(false);
     }
@@ -322,13 +322,13 @@ export default function MatchesPage() {
   const copyContact = () => {
     if (contactInfo?.contact_info) {
       navigator.clipboard.writeText(contactInfo.contact_info);
-      toast.success('联系方式已复制');
+      messageToast.success('联系方式已复制');
     }
   };
 
   const goToMatchAnswers = (match: MatchWithDetails) => {
     if (!match.otherResult?.answers || !match.quiz_id) {
-      toast.error('暂无对方答题数据');
+      messageToast.error('暂无对方答题数据');
       return;
     }
     navigate(`/match-answers/${match.id}`);

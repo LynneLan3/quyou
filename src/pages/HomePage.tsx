@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import { Loader2, ClipboardList, ArrowRight, BookOpen } from 'lucide-react';
 
 interface QuizWithCount {
@@ -50,7 +50,7 @@ export default function HomePage() {
         setQuizzes(formattedData);
       } catch (error) {
         console.error('Error fetching quizzes:', error);
-        toast.error('加载问卷失败');
+        messageToast.error('加载问卷失败');
       } finally {
         setLoading(false);
       }

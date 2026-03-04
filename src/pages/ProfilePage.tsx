@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import { Loader2, User, Mail, MapPin, Save, Edit3, Camera } from 'lucide-react';
 
 interface UserProfile {
@@ -51,7 +51,7 @@ export default function ProfilePage() {
       try {
         const user = await getCurrentUser();
         if (!user) {
-          toast.error('请先登录');
+          messageToast.error('请先登录');
           return;
         }
 
@@ -103,7 +103,7 @@ export default function ProfilePage() {
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
-        toast.error('加载个人资料失败');
+        messageToast.error('加载个人资料失败');
       } finally {
         setLoading(false);
       }
@@ -119,13 +119,13 @@ export default function ProfilePage() {
 
     // 验证文件类型
     if (!file.type.startsWith('image/')) {
-      toast.error('请上传图片文件');
+      messageToast.error('请上传图片文件');
       return;
     }
 
     // 验证文件大小（最大 2MB）
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('图片大小不能超过 2MB');
+      messageToast.error('图片大小不能超过 2MB');
       return;
     }
 
@@ -134,7 +134,7 @@ export default function ProfilePage() {
     try {
       const user = await getCurrentUser();
       if (!user) {
-        toast.error('请先登录');
+        messageToast.error('请先登录');
         return;
       }
 
@@ -159,10 +159,10 @@ export default function ProfilePage() {
 
       // 更新表单数据
       setFormData({ ...formData, avatar_url: publicUrl });
-      toast.success('头像上传成功！');
+      messageToast.success('头像上传成功！');
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      toast.error('头像上传失败，请重试');
+      messageToast.error('头像上传失败，请重试');
     } finally {
       setUploading(false);
     }
@@ -170,13 +170,13 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (!formData.nickname.trim()) {
-      toast.error('请输入昵称');
+      messageToast.error('请输入昵称');
       return;
     }
 
     // 联系方式必填验证
     if (!formData.contact_info?.trim()) {
-      toast.error('请填写联系方式');
+      messageToast.error('请填写联系方式');
       return;
     }
 
@@ -185,7 +185,7 @@ export default function ProfilePage() {
     try {
       const user = await getCurrentUser();
       if (!user) {
-        toast.error('请先登录');
+        messageToast.error('请先登录');
         return;
       }
 
@@ -211,7 +211,7 @@ export default function ProfilePage() {
       };
       setProfile(updatedProfile);
       setEditing(false);
-      toast.success('保存成功！正在跳转到问卷首页...');
+      messageToast.success('保存成功！正在跳转到问卷首页...');
       
       // 保存成功后跳转到问卷首页
       setTimeout(() => {
@@ -219,7 +219,7 @@ export default function ProfilePage() {
       }, 800);
     } catch (error) {
       console.error('Error saving profile:', error);
-      toast.error('保存失败，请重试');
+      messageToast.error('保存失败，请重试');
     } finally {
       setSaving(false);
     }
@@ -228,7 +228,7 @@ export default function ProfilePage() {
   const handleCancel = () => {
     // 如果是新用户或必填项为空，不允许取消
     if (!profile || !profile.nickname || !profile.contact_info) {
-      toast.error('请先完成必填项');
+      messageToast.error('请先完成必填项');
       return;
     }
     

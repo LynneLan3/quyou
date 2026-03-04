@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase/client';
 import { getCurrentUser } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { messageToast } from '@/components/MessageModal';
 import { Loader2, ArrowLeft, ClipboardList, Check, XCircle } from 'lucide-react';
 
 interface AnswerRow {
@@ -33,7 +33,7 @@ export default function MatchAnswersPage() {
       try {
         const user = await getCurrentUser();
         if (!user) {
-          toast.error('请先登录');
+          messageToast.error('请先登录');
           navigate('/auth');
           return;
         }

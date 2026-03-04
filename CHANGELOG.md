@@ -1,5 +1,31 @@
 # 更新日志 (CHANGELOG)
 
+## [v1.2.0] - 2026-03-04
+
+### ✨ 功能更新
+
+#### 🔐 分享链接隐私与匹配修复
+- **分享链接 from 参数编码**：分享地址中的用户 ID 使用 Base64URL 编码，不再明文暴露，降低隐私泄露风险
+- **邀请链接 from 持久化**：未登录用户点击邀请链接跳转登录前，将 `from` 写入 sessionStorage，登录后回跳若丢失 query 仍可恢复邀请人，保证被分享用户能正常收到发起人的匹配请求
+- 新增 `src/lib/shareLink.ts`：`encodeFromParam` / `decodeFromParam`，兼容旧链接明文 ID
+
+#### 💬 提示方式改为弹窗
+- **全局 toast 改为弹窗提示**：所有原 toast 提示改为居中弹窗（MessageModal），需用户点击「确定」后才关闭
+- 新增 `MessageModal` 组件与 `messageToast` API（success / error / info / warning），样式统一、二次确认
+- 移除页面内 sonner Toaster，全站统一使用弹窗提示
+
+#### 🔑 登录注册（v1.2.0 前已提交，此处记录）
+- 注册需输入两次密码确认，支持明文显示/隐藏密码
+- 输入账号密码后先尝试登录，未找到账号则提示设置密码并显示确认密码框完成注册
+- 注册/登录 429 限流时提示「若该邮箱已注册请直接登录」
+
+### 🛠️ 技术改动
+- App 根节点包裹 `MessageModalProvider`，通过全局 ref 驱动弹窗
+- 各页面 `toast` 调用替换为 `messageToast`，引入自 `@/components/MessageModal`
+- 问卷页、结果页、已完成详情页生成分享链接时使用 `encodeFromParam`，读取时使用 `decodeFromParam`
+
+---
+
 ## [v1.1.0] - 2026-02-17
 
 ### ✨ 新增功能
