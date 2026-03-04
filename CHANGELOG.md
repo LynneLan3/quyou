@@ -1,5 +1,22 @@
 # 更新日志 (CHANGELOG)
 
+## [v1.2.1] - 2026-03-04
+
+### 🐛 Bug 修复
+
+#### 🔧 修复分享链接无法打开的问题
+- **问题**：分享链接打开时报错 `Expected a JavaScript module but got text/html`，页面无法加载
+- **原因**：`vercel.json` 的 `rewrites` 配置将所有请求（包括 JS/CSS 静态资源）都重定向到 `index.html`，导致浏览器请求 JS 文件时收到 HTML 内容，触发 MIME 类型检查失败
+- **解决**：将 `rewrites` 改为 `routes` 配置，添加 `handle: filesystem` 优先处理静态文件，只对非文件路径进行 SPA fallback
+- **影响**：分享链接现在可以正常打开，所有静态资源正确加载，SPA 路由功能正常工作
+
+#### 📝 添加调试日志
+- 在 `ResultPage`、`CompletedQuizDetailPage` 中添加分享链接和二维码生成的详细日志
+- 在 `QuizPage` 中添加 from 参数解码日志
+- 创建 `分享功能调试指南.md`，包含完整的验证步骤和问题排查方案
+
+---
+
 ## [v1.2.0] - 2026-03-04
 
 ### ✨ 功能更新
