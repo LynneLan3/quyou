@@ -114,9 +114,9 @@ export default function AuthPage() {
             messageToast.error(errorMessage);
           }
         } else if (signUpData?.session) {
-          // 未开启邮箱确认时：直接有 session，立即写 profile 并跳转
+          // 已关闭邮箱确认：两次密码一致即注册成功，直接有 session
           const redirectTo = searchParams.get('redirect');
-          messageToast.success(redirectTo?.includes('/quiz/') ? '注册成功！正在跳转到问卷…' : '注册成功！正在跳转…');
+          messageToast.success('注册成功');
           try {
             await createUserProfile(signUpData.session.user.id, email);
           } catch (_) {
@@ -128,33 +128,27 @@ export default function AuthPage() {
             window.location.href = '/profile';
           }
         } else if (signUpData?.user) {
-          // 开启了邮箱确认：user 存在但 session 为 null，需用户点击邮件链接后才会有 session
-          messageToast.success('注册成功！请查收邮件并点击链接完成验证，验证后可登录。');
-          // 不跳转，避免被 App 因无 session 重定向回 /auth
-        } else {
-          // 极少数情况：无 error 但无 user/session，短暂轮询 session 后决定
-          messageToast.success('注册请求已提交…');
+          // 极少数：有 user 无 session，稍等后重试一次再跳转
+          messageToast.success('注册成功');
           const redirectTo = searchParams.get('redirect');
-          const waitForSession = async (retries = 15) => {
-            for (let i = 0; i < retries; i++) {
-              const result = await getSession();
-              const session = result?.data?.session;
-              if (session?.user) {
-                try {
-                  await createUserProfile(session.user.id, email);
-                } catch (_) {}
-                if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
-                  window.location.href = redirectTo;
-                } else {
-                  window.location.href = '/profile';
-                }
-                return;
-              }
-              await new Promise((r) => setTimeout(r, 300));
+          const result = await getSession();
+          const session = result?.data?.session;
+          if (session?.user) {
+            try {
+              await createUserProfile(session.user.id, email);
+            } catch (_) {}
+            if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
+              window.location.href = redirectTo;
+            } else {
+              window.location.href = '/profile';
             }
-            messageToast.info('若已开启邮箱验证，请查收邮件完成验证后登录。');
-          };
-          waitForSession();
+          } else {
+            window.location.href = redirectTo?.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/profile';
+          }
+        } else {
+          messageToast.success('注册成功');
+          const redirectTo = searchParams.get('redirect');
+          window.location.href = redirectTo?.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/profile';
         }
     } catch (error) {
       console.error('Auth operation failed:', error);
