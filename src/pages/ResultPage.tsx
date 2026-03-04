@@ -764,7 +764,7 @@ export default function ResultPage() {
                       })()}
                     </div>
 
-                    {/* 底部：二维码（完美圆形） */}
+                    {/* 底部：二维码（方形带圆角） */}
                     <div className="flex items-end justify-between">
                       <div className="space-y-1 pb-2">
                         <p className="text-[10px] font-bold text-white/60 tracking-tight">
@@ -776,17 +776,16 @@ export default function ResultPage() {
                       </div>
                       
                       <div className="relative group">
-                        <div className="absolute inset-0 bg-white/20 rounded-full blur-xl animate-pulse" />
-                        <div className="w-20 h-20 bg-white rounded-full p-3 shadow-2xl flex items-center justify-center relative z-10 border-4 border-white/20">
-                          <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white">
-                            <QRCodeSVG 
-                              value={shareUrl} 
-                              size={56}
-                              bgColor="transparent"
-                              fgColor="#000000"
-                              level="L"
-                            />
-                          </div>
+                        <div className="absolute inset-0 bg-white/20 rounded-xl blur-xl animate-pulse" />
+                        <div className="w-24 h-24 bg-white rounded-xl p-2 shadow-2xl flex items-center justify-center relative z-10 border-2 border-white/20">
+                          <QRCodeSVG 
+                            value={shareUrl} 
+                            size={80}
+                            bgColor="#FFFFFF"
+                            fgColor="#000000"
+                            level="M"
+                            includeMargin={false}
+                          />
                         </div>
                       </div>
                     </div>
