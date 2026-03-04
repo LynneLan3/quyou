@@ -350,8 +350,14 @@ export default function ResultPage() {
 
     const userId = result.user_id;
     const quizId = result.quiz_id;
-    const shareUrl = `${window.location.origin}/quiz/${quizId}?from=${encodeFromParam(userId)}`;
+    const encodedFrom = encodeFromParam(userId);
+    const shareUrl = `${window.location.origin}/quiz/${quizId}?from=${encodedFrom}`;
     const copyText = `好友邀请你来答题，点击进入：${shareUrl}`;
+
+    console.log('🔗 [分享链接] 原始 userId:', userId);
+    console.log('🔗 [分享链接] 编码后 from:', encodedFrom);
+    console.log('🔗 [分享链接] 完整链接:', shareUrl);
+    console.log('🔗 [分享链接] 复制文案:', copyText);
 
     navigator.clipboard.writeText(copyText);
     setCopied(true);
@@ -453,6 +459,12 @@ export default function ResultPage() {
   }
 
   const shareUrl = `${window.location.origin}/quiz/${result.quiz_id}?from=${encodeFromParam(result.user_id)}`;
+  
+  console.log('📱 [二维码] shareUrl:', shareUrl);
+  console.log('📱 [二维码] window.location.origin:', window.location.origin);
+  console.log('📱 [二维码] result.quiz_id:', result.quiz_id);
+  console.log('📱 [二维码] result.user_id:', result.user_id);
+  console.log('📱 [二维码] encodeFromParam(result.user_id):', encodeFromParam(result.user_id));
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in-up">

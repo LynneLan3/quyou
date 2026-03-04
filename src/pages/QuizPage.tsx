@@ -42,6 +42,9 @@ export default function QuizPage() {
   // 优先用 URL 的 from（分享人 id，已编码），登录跳转后若丢失则从 sessionStorage 恢复；解码得到真实用户 id
   const fromRaw = searchParams.get('from') || (quizId ? sessionStorage.getItem(`from_quiz_${quizId}`) : null);
   const fromUserId = decodeFromParam(fromRaw);
+  
+  console.log('🔍 [QuizPage] fromRaw:', fromRaw);
+  console.log('🔍 [QuizPage] fromUserId (解码后):', fromUserId);
 
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [questions, setQuestions] = useState<QuestionWithOptions[]>([]);

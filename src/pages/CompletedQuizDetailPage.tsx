@@ -182,6 +182,14 @@ export default function CompletedQuizDetailPage() {
   const shareUrl = result
     ? `${window.location.origin}/quiz/${result.quiz_id}?from=${encodeFromParam(result.user_id)}`
     : '';
+  
+  if (result) {
+    console.log('📱 [CompletedQuizDetail二维码] shareUrl:', shareUrl);
+    console.log('📱 [CompletedQuizDetail二维码] window.location.origin:', window.location.origin);
+    console.log('📱 [CompletedQuizDetail二维码] result.quiz_id:', result.quiz_id);
+    console.log('📱 [CompletedQuizDetail二维码] result.user_id:', result.user_id);
+    console.log('📱 [CompletedQuizDetail二维码] encodeFromParam(result.user_id):', encodeFromParam(result.user_id));
+  }
 
   const handleCopyLink = () => {
     if (!result) return;
