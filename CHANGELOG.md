@@ -4,16 +4,30 @@
 
 ### 🐛 Bug 修复
 
-#### 🔧 修复分享链接无法打开的问题
-- **问题**：分享链接打开时报错 `Expected a JavaScript module but got text/html`，页面无法加载
+#### 🔧 修复分享链接无法打开的问题（两个根本原因）
+
+**问题 1：Vercel 路由配置错误**
+- **症状**：分享链接打开时报错 `Expected a JavaScript module but got text/html`，页面无法加载
 - **原因**：`vercel.json` 的 `rewrites` 配置将所有请求（包括 JS/CSS 静态资源）都重定向到 `index.html`，导致浏览器请求 JS 文件时收到 HTML 内容，触发 MIME 类型检查失败
 - **解决**：将 `rewrites` 改为 `routes` 配置，添加 `handle: filesystem` 优先处理静态文件，只对非文件路径进行 SPA fallback
-- **影响**：分享链接现在可以正常打开，所有静态资源正确加载，SPA 路由功能正常工作
 
-#### 📝 添加调试日志
+**问题 2：Vite 使用相对路径**
+- **症状**：修复问题 1 后，分享链接仍然空白，Vercel 缓存显示 HIT
+- **原因**：`vite.config.ts` 中 `base: './'` 导致 `index.html` 使用相对路径 `./assets/index.js`，访问 `/quiz/xxx` 时浏览器尝试加载 `/quiz/assets/index.js`（实际在 `/assets/index.js`）
+- **解决**：将 `base` 改为 `'/'`，使用绝对路径，确保所有路由都能正确加载静态资源
+
+**影响**：
+- 分享链接现在可以正常打开
+- 所有静态资源正确加载
+- 子路由（如 `/quiz/xxx`）能正确加载 JS/CSS
+- SPA 路由功能正常工作
+
+#### 📝 添加调试日志和文档
 - 在 `ResultPage`、`CompletedQuizDetailPage` 中添加分享链接和二维码生成的详细日志
 - 在 `QuizPage` 中添加 from 参数解码日志
 - 创建 `分享功能调试指南.md`，包含完整的验证步骤和问题排查方案
+- 创建 `分享功能修复总结.md`，详细记录问题分析和解决方案
+- 创建 `✅_分享功能验证清单.md`，提供快速验证步骤
 
 ---
 
