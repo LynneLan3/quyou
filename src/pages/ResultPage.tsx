@@ -372,7 +372,8 @@ export default function ResultPage() {
       setDownloadingCard(true);
       const dataUrl = await htmlToImage.toPng(shareCardRef.current, {
         cacheBust: true,
-        pixelRatio: window.devicePixelRatio || 2,
+        pixelRatio: 3,
+        quality: 1.0,
       });
       const link = document.createElement('a');
       link.href = dataUrl;
@@ -780,14 +781,14 @@ export default function ResultPage() {
                       
                       <div className="relative group">
                         <div className="absolute inset-0 bg-white/20 rounded-xl blur-xl animate-pulse" />
-                        <div className="w-24 h-24 bg-white rounded-xl p-2 shadow-2xl flex items-center justify-center relative z-10 border-2 border-white/20">
+                        <div className="w-28 h-28 bg-white rounded-xl p-2 shadow-2xl flex items-center justify-center relative z-10 border-2 border-white/20">
                           <QRCodeSVG 
                             value={shareUrl} 
-                            size={80}
+                            size={104}
                             bgColor="#FFFFFF"
                             fgColor="#000000"
-                            level="M"
-                            includeMargin={false}
+                            level="H"
+                            includeMargin={true}
                           />
                         </div>
                       </div>
