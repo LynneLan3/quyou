@@ -2,7 +2,7 @@
  * 分享链接中的 from 参数（用户 id）编码/解码，避免 URL 中明文暴露
  */
 
-const PREFIX = 'f.'; // 简单标识，解码时兼容无前缀的旧链接
+const PREFIX = 'f_'; // 使用下划线避免二维码扫描时点号被误处理
 
 /** 将用户 id 编码为可放在 URL 中的字符串（Base64URL + 前缀） */
 export function encodeFromParam(userId: string): string {
