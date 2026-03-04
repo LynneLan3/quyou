@@ -13,6 +13,7 @@ import {
   Share2,
   Copy,
   Check,
+  Users,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import * as htmlToImage from 'html-to-image';
@@ -32,19 +33,6 @@ interface QuizResult {
       rules: { min: number; max: number; tag: string; description: string }[];
     };
   };
-}
-
-function getUnsplashLandscape(quizTitle: string): string {
-  const keywords = quizTitle.toLowerCase();
-  let term = 'landscape,nature,scenic';
-  if (keywords.includes('旅行') || keywords.includes('旅游')) term = 'travel,landscape,adventure';
-  else if (keywords.includes('爱情') || keywords.includes('恋爱')) term = 'romance,couple,sunset';
-  else if (keywords.includes('性格') || keywords.includes('心理')) term = 'nature,mountain,fog';
-  else if (keywords.includes('工作') || keywords.includes('职业')) term = 'city,skyline,professional';
-  else if (keywords.includes('美食')) term = 'food,cuisine,restaurant';
-  else if (keywords.includes('音乐') || keywords.includes('艺术')) term = 'concert,art,creative';
-  else if (keywords.includes('运动') || keywords.includes('健身')) term = 'fitness,sport,outdoor';
-  return `https://source.unsplash.com/600x900/?${term}`;
 }
 
 function getInviteCopy(quizTitle: string, tag: string, score: number): { main: string; sub: string; invite: string } {
@@ -237,7 +225,7 @@ export default function CompletedQuizDetailPage() {
 
   if (!result) return null;
 
-  const inviteCopy = getInviteCopy(result.quizzes.title);
+  const inviteCopy = getInviteCopy(result.quizzes.title, result.tag, result.score);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in-up pb-20">

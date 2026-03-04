@@ -51,8 +51,9 @@ export default function MatchAnswersPage() {
           return;
         }
 
-        const otherUserId = match.requester_id === currentUserId ? match.receiver_id : match.requester_id;
-        const quizId = match.quiz_id;
+        const matchRow = match as { requester_id: string; receiver_id: string; quiz_id: string };
+        const otherUserId = matchRow.requester_id === currentUserId ? matchRow.receiver_id : matchRow.requester_id;
+        const quizId = matchRow.quiz_id;
 
         const [
           { data: otherProfile },
@@ -69,11 +70,13 @@ export default function MatchAnswersPage() {
         setOtherNickname((otherProfile as any)?.nickname || 'TA');
         setQuizTitle((quizData as any)?.title || '未知问卷');
 
-        const myAnswers = myResult?.answers
-          ? (typeof (myResult as any).answers === 'string' ? JSON.parse((myResult as any).answers) : (myResult as any).answers) as Record<string, string>
+        const myResultRow = myResult as { answers?: unknown } | null;
+        const otherResultRow = otherResult as { answers?: unknown } | null;
+        const myAnswers = myResultRow?.answers
+          ? (typeof myResultRow.answers === 'string' ? JSON.parse(myResultRow.answers) : myResultRow.answers) as Record<string, string>
           : null;
-        const otherAnswers = otherResult?.answers
-          ? (typeof (otherResult as any).answers === 'string' ? JSON.parse((otherResult as any).answers) : (otherResult as any).answers) as Record<string, string>
+        const otherAnswers = otherResultRow?.answers
+          ? (typeof otherResultRow.answers === 'string' ? JSON.parse(otherResultRow.answers as string) : otherResultRow.answers) as Record<string, string>
           : null;
 
         if (!otherAnswers || Object.keys(otherAnswers).length === 0) {

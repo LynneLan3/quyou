@@ -72,31 +72,6 @@ export default function ResultPage() {
   const [downloadingCard, setDownloadingCard] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState<string>('');
 
-  // 根据问卷主题获取 Unsplash 背景图片
-  const getUnsplashBackground = (quizTitle: string) => {
-    const keywords = quizTitle.toLowerCase();
-    let searchTerm = 'nature,landscape';
-    
-    if (keywords.includes('旅行') || keywords.includes('旅游')) {
-      searchTerm = 'travel,adventure,wanderlust';
-    } else if (keywords.includes('爱情') || keywords.includes('恋爱') || keywords.includes('情感')) {
-      searchTerm = 'romance,love,couple';
-    } else if (keywords.includes('性格') || keywords.includes('心理')) {
-      searchTerm = 'psychology,personality,abstract';
-    } else if (keywords.includes('工作') || keywords.includes('职业')) {
-      searchTerm = 'business,career,professional';
-    } else if (keywords.includes('美食') || keywords.includes('食物')) {
-      searchTerm = 'food,cuisine,cooking';
-    } else if (keywords.includes('音乐') || keywords.includes('艺术')) {
-      searchTerm = 'music,art,creative';
-    } else if (keywords.includes('运动') || keywords.includes('健身')) {
-      searchTerm = 'fitness,sport,active';
-    }
-    
-    // 使用 Unsplash Source API 获取随机图片
-    return `https://source.unsplash.com/600x900/?${searchTerm}`;
-  };
-
   const [userProfile, setUserProfile] = useState<{ nickname?: string; avatar_url?: string } | null>(null);
 
   useEffect(() => {
